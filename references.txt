@@ -1,0 +1,10 @@
+references:
+http://engineering.wingify.com/posts/getting-60fps-using-devtools/
+https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching
+https://developers.google.com/speed/articles/optimizing-javascript
+http://jpeg-optimizer.com/
+https://tinypng.com/
+http://images.my-addr.com/resize_png_online_tool-free_png_resizer_for_web.php
+
+I also read the Udacity forum for project 4
+

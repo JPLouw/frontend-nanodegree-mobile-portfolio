@@ -448,13 +448,18 @@ var resizePizzas = function(size) {
     return dx;
   }
 
-  // Iterates through pizza elements on the page and changes their widths
-  function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
-    }
+ // Iterates through pizza elements on the page and changes their widths
+  function changePizzaSizes(size) {  	
+	if(randomPizzaContainers.length > 0){
+		//all the containers have the same size, so we only need to calculate the new size once
+		var dx = determineDx(randomPizzaContainers[0], size);
+		var newwidth = (randomPizzaContainers[0].offsetWidth + dx) + 'px';
+		
+		//update all the containers with the new size
+		for (var i = 0; i < randomPizzaContainers.length; i++) { 
+		  randomPizzaContainers[i].style.width = newwidth;
+		}
+	}
   }
 
   changePizzaSizes(size);
@@ -473,6 +478,9 @@ for (var i = 2; i < 100; i++) {
   var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
+
+//put the pizza containers in an array variable so we don't have to query for them multiple times
+var randomPizzaContainers = document.querySelectorAll(".randomPizzaContainer");
 
 // User Timing API again. These measurements tell you how long it took to generate the initial pizzas
 window.performance.mark("mark_end_generating");
@@ -494,20 +502,40 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
   console.log("Average time to generate last 10 frames: " + sum / 10 + "ms");
 }
 
+//create a global variable to hold the moving pizzas in the background so 
+//I only have to query for them once
+var movingPizzas;   
+
+function setMovingPizzas(){
+	movingPizzas = document.querySelectorAll('.mover');
+
+};
+
 // The following code for sliding background pizzas was pulled from Ilya's demo found at:
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
 // Moves the sliding background pizzas based on scroll position
+
+
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var items = document.querySelectorAll('.mover');
-  for (var i = 0; i < items.length; i++) {
+  var newLefts = [];
+  
+  for (var i = 0; i < movingPizzas.length; i++) {
     var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+	var newLeft = movingPizzas[i].basicLeft + 100 * phase;
+	newLefts[i] = [newLeft, 'px'].join('');    
   }
-
+  
+  function setNewLefts(){
+	  for (var i = 0; i < movingPizzas.length; i++) {
+		movingPizzas[i].style.left = newLefts[i];   
+	  }
+  }
+  
+  window.requestAnimationFrame(setNewLefts);
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
   window.performance.mark("mark_end_frame");
@@ -525,7 +553,7 @@ window.addEventListener('scroll', updatePositions);
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  for (var i = 0; i < 32; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
@@ -535,5 +563,6 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
     document.querySelector("#movingPizzas1").appendChild(elem);
   }
+  setMovingPizzas();
   updatePositions();
 });
